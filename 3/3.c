@@ -103,7 +103,7 @@ pthread_create(&(tid[1]),NULL,&playandcount,NULL);//membuat thread
    		
 		printf("Fitur Agmal ayo bangun disabled 10 s\n");}
 			
-	if(iraj<=0 || agmal >=100){
+	if(iraj<=0){
 	printf("Iraj Ikut Tidur,Dan Bangun Kesiangan Bersama Agmal");	
 	exit(0);	
 	}
