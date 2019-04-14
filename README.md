@@ -138,4 +138,234 @@ else if(strcmp(print,"Iraj Ayo Tidur")==0 && tidur == 1){
 
   ```
   
-  asda
+# 4
+Buatlah sebuah program C dimana dapat menyimpan list proses yang sedang berjalan (ps -aux) maksimal 10 list proses. Dimana awalnya list proses disimpan dalam di 2 file ekstensi .txt yaitu  SimpanProses1.txt di direktori /home/Document/FolderProses1 dan SimpanProses2.txt di direktori /home/Document/FolderProses2 , setelah itu masing2 file di  kompres zip dengan format nama file KompresProses1.zip dan KompresProses2.zip dan file SimpanProses1.txt dan SimpanProses2.txt akan otomatis terhapus, setelah itu program akan menunggu selama 15 detik lalu program akan mengekstrak kembali file KompresProses1.zip dan KompresProses2.zip 
+Dengan Syarat : 
+Setiap list proses yang di simpan dalam masing-masing file .txt harus berjalan bersama-sama
+Ketika mengkompres masing-masing file .txt harus berjalan bersama-sama
+Ketika Mengekstrak file .zip juga harus secara bersama-sama
+Ketika Telah Selesai melakukan kompress file .zip masing-masing file, maka program akan memberi pesan “Menunggu 15 detik untuk mengekstrak kembali”
+Wajib Menggunakan Multithreading
+Boleh menggunakan system
+
+
+Source Code 
+```C
+#include<stdio.h>
+#include<string.h>
+#include<pthread.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<stdlib.h>
+ 
+pthread_t tid[6];
+int step;
+void* buatfile(void *arg)
+{
+    pthread_t id=pthread_self();
+    if(pthread_equal(id,tid[0]))
+    {
+        system("ps aux | head -10 > /home/zahrul/Documents/FolderProses1/SimpanProses1.txt");
+}
+    if(pthread_equal(id,tid[1]))
+    {
+     
+        system("ps aux | head -10 > /home/zahrul/Documents/FolderProses2/SimpanProses2.txt");
+    }
+    step =1;
+    return NULL;
+}
+
+void* compress(void *arg)
+{
+    while(step != 1)
+    {
+
+    }
+    pthread_t id=pthread_self();
+    if(pthread_equal(id,tid[2]))    {
+        system("zip -qmj /home/zahrul/Documents/FolderProses1/KompresProses1.zip /home/zahrul/Documents/FolderProses1/SimpanProses1.txt");
+
+
+    }
+if(pthread_equal(id,tid[3]))
+    {
+        system("zip -qmj /home/zahrul/Documents/FolderProses2/KompresProses2.zip /home/zahrul/Documents/FolderProses2/SimpanProses2.txt");
+
+    }
+    
+
+    step =2;
+    return NULL;
+
+}
+
+void* extract(void *arg)
+{
+    while(step !=2)
+    {
+
+    }
+    printf("Menunggu 15 detik untuk mengekstrak kembali\n");
+	int x = 1;
+	while(x!=16){    
+	sleep(1);		
+	printf("%d\n",x);
+	x=x+1;
+		
+	}
+    
+    pthread_t id=pthread_self();
+    if(pthread_equal(id,tid[4]))
+    {
+    	
+        system("unzip -qd /home/zahrul/Documents/FolderProses1/ /home/zahrul/Documents/FolderProses1/KompresProses1.zip");
+
+        system("unzip -qd /home/zahrul/Documents/FolderProses2/ /home/zahrul/Documents/FolderProses2/KompresProses2.zip");
+        
+    }
+    step =3;
+    return NULL;
+}
+
+int main(void)
+{
+    unsigned long masuk=0,k=0;
+    int err;
+    
+    while(masuk<2)
+    {
+        err=pthread_create(&(tid[masuk]),NULL,&buatfile,NULL);
+   
+        masuk++;
+    }
+	if(masuk >= 2)
+    while(masuk<4)
+    {
+        err=pthread_create(&(tid[masuk]),NULL,&compress,NULL);
+ 
+        masuk++;
+    }
+	if(masuk >= 4)
+    while(masuk<6)
+    {
+        err=pthread_create(&(tid[masuk]),NULL,&extract,NULL);
+        masuk++;
+    }
+    
+    while(k<6){
+	
+    pthread_join(tid[k],NULL);
+    k++;
+	}
+    
+    return 0;
+}
+```
+Berikut Adalah Penjelasan Source Code Diatas
+```C
+while(masuk<2)
+    {
+        err=pthread_create(&(tid[masuk]),NULL,&buatfile,NULL);
+   
+        masuk++;
+    }
+    ```
+```
+Diatas DIgunakan untuk membuat thread sesuai dengan urutan tid dan Mutual Exclusionnya
+```C
+void* buatfile(void *arg)
+{
+    pthread_t id=pthread_self();
+    if(pthread_equal(id,tid[0]))
+    {
+        system("ps aux | head -10 > /home/zahrul/Documents/FolderProses1/SimpanProses1.txt");
+}
+    if(pthread_equal(id,tid[1]))
+    {
+     
+        system("ps aux | head -10 > /home/zahrul/Documents/FolderProses2/SimpanProses2.txt");
+    }
+    step =1;
+    return NULL;
+}
+```
+Diatas digunakan untuk membuat Mutual Exclusion dan Thread yang berjalan secara bersamaan dan gunanya untuk membuat file simpan proses1.txt dan simpanproses2.txt dengan megambil max 10 proses.
+
+```C
+void* compress(void *arg)
+{
+    while(step != 1)
+    {
+
+    }
+    pthread_t id=pthread_self();
+    if(pthread_equal(id,tid[2]))    {
+        system("zip -qmj /home/zahrul/Documents/FolderProses1/KompresProses1.zip /home/zahrul/Documents/FolderProses1/SimpanProses1.txt");
+
+
+    }
+if(pthread_equal(id,tid[3]))
+    {
+        system("zip -qmj /home/zahrul/Documents/FolderProses2/KompresProses2.zip /home/zahrul/Documents/FolderProses2/SimpanProses2.txt");
+
+    }
+    
+
+    step =2;
+    return NULL;
+
+}
+```
+Diatas digunakan untuk membuat Mutual Exclusion dan Thread yang berjalan secara bersamaan dan gunanya untuk Mengunzip file simpan proses1.txt dan simpanproses2.txt dan mengilangkannya yang bukan zip.
+
+
+```
+void* extract(void *arg)
+{
+    while(step !=2)
+    {
+
+    }
+    printf("Menunggu 15 detik untuk mengekstrak kembali\n");
+	int x = 1;
+	while(x!=16){    
+	sleep(1);		
+	printf("%d\n",x);
+	x=x+1;
+		
+	}
+    
+    pthread_t id=pthread_self();
+    if(pthread_equal(id,tid[4]))
+    {
+    	
+        system("unzip -qd /home/zahrul/Documents/FolderProses1/ /home/zahrul/Documents/FolderProses1/KompresProses1.zip");
+
+        system("unzip -qd /home/zahrul/Documents/FolderProses2/ /home/zahrul/Documents/FolderProses2/KompresProses2.zip");
+        
+    }
+    step =3;
+    return NULL;
+}
+```
+Diatas 
+```C
+ printf("Menunggu 15 detik untuk mengekstrak kembali\n");
+	int x = 1;
+	while(x!=16){    
+	sleep(1);		
+	printf("%d\n",x);
+	x=x+1;
+		
+	}
+```
+Digunakan untuk mensleep dan menghitung selama 15 detik
+
+```C
+
+        system("unzip -qd /home/zahrul/Documents/FolderProses1/ /home/zahrul/Documents/FolderProses1/KompresProses1.zip");
+
+        system("unzip -qd /home/zahrul/Documents/FolderProses2/ /home/zahrul/Documents/FolderProses2/KompresProses2.zip");
+```
+Pada Diatas digunakan untuk mengunzip
